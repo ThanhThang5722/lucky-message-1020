@@ -196,6 +196,109 @@
       from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0);    }
     }
+
+    /* ── Hint vuốt lên ── */
+    .swipe-hint {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      opacity: 0;
+      animation: fadeSlideUp 1s ease 3.2s forwards;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .swipe-hint-arrow {
+      font-size: 1.3rem;
+      color: rgba(212, 175, 55, 0.85);
+      animation: arrowBounce 1.7s ease-in-out infinite;
+    }
+    .swipe-hint-text {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.76rem;
+      font-weight: 300;
+      letter-spacing: 1.4px;
+      color: rgba(248, 215, 225, 0.60);
+      white-space: nowrap;
+    }
+    @keyframes arrowBounce {
+      0%, 100% { transform: translateY(0);   opacity: 0.6; }
+      50%       { transform: translateY(-7px); opacity: 1;   }
+    }
+
+    /* ── Modal lời chúc ── */
+    .msg-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(12, 2, 8, 0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      cursor: pointer;
+      animation: overlayIn 0.35s ease forwards;
+    }
+    .msg-overlay.hidden { display: none; }
+    .msg-overlay.closing { animation: overlayOut 0.28s ease forwards; }
+    @keyframes overlayIn  { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
+
+    .msg-card {
+      background: rgba(48, 5, 20, 0.95);
+      border: 1px solid rgba(212, 175, 55, 0.5);
+      border-radius: 20px;
+      padding: clamp(30px, 5vw, 52px) clamp(28px, 7vw, 66px);
+      max-width: min(86vw, 520px);
+      text-align: center;
+      animation: cardUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      box-shadow:
+        0 0 90px rgba(0, 0, 0, 0.7),
+        0 0 40px rgba(180, 40, 80, 0.14),
+        inset 0 1px 0 rgba(212, 175, 55, 0.18);
+    }
+    @keyframes cardUp {
+      from { transform: translateY(52px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .msg-label {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 3.5px;
+      color: rgba(212, 175, 55, 0.72);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .msg-text {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.05rem, 3.4vw, 1.52rem);
+      font-style: italic;
+      color: #FFF5EE;
+      line-height: 1.76;
+      text-shadow: 0 0 24px rgba(212, 175, 55, 0.22);
+    }
+    .msg-divider {
+      width: 56px;
+      height: 1px;
+      background: linear-gradient(90deg,
+        transparent, rgba(212,175,55,0.65), transparent);
+      margin: 18px auto 12px;
+    }
+    .msg-close {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      font-size: 0.70rem;
+      font-weight: 300;
+      letter-spacing: 1px;
+      color: rgba(248, 215, 225, 0.38);
+    }
   </style>
 </head>
 <body>
@@ -215,6 +318,22 @@
         hạnh phúc và thành công
       </p>
       <div class="ornament-bottom">🌸 ✦ 🌸</div>
+    </div>
+  </div>
+
+  <!-- Swipe hint -->
+  <div class="swipe-hint" id="swipeHint">
+    <div class="swipe-hint-arrow">↑</div>
+    <div class="swipe-hint-text">Vuốt lên nhận lời chúc</div>
+  </div>
+
+  <!-- Lucky message modal -->
+  <div class="msg-overlay hidden" id="msgOverlay">
+    <div class="msg-card">
+      <div class="msg-label">✦ Lời Chúc May Mắn ✦</div>
+      <p class="msg-text" id="msgText"></p>
+      <div class="msg-divider"></div>
+      <div class="msg-close">Chạm để đóng</div>
     </div>
   </div>
 
@@ -520,6 +639,156 @@
 
       requestAnimationFrame(loop);
     }
+
+    /* ─────────── LUCKY MESSAGES (100 câu) ─────────── */
+    const MESSAGES = [
+      "Hôm nay là ngày của bạn — tỏa sáng đi nào! ✨",
+      "May mắn đang trên đường đến tìm bạn, hãy mở cửa đón nhé!",
+      "Bạn mạnh mẽ hơn bạn nghĩ, xinh đẹp hơn gương phản chiếu.",
+      "Hạnh phúc không phải điểm đến — nó là từng khoảnh khắc bạn đang sống.",
+      "Hôm nay sẽ có điều kỳ diệu nhỏ xảy ra với bạn!",
+      "Nụ cười của bạn là thứ vũ khí mạnh nhất thế giới.",
+      "Một người phụ nữ với ý chí kiên định có thể thay đổi cả thế giới.",
+      "Bạn không cần hoàn hảo, bạn chỉ cần là chính mình.",
+      "Mọi ngày đều là cơ hội mới — hãy nắm lấy nó!",
+      "Thành công của bạn đang chờ ở phía bên kia của sự kiên trì.",
+      "Bạn là phiên bản duy nhất và tuyệt vời nhất của chính mình.",
+      "Tình yêu thương bắt đầu từ việc yêu chính bản thân mình.",
+      "Cuộc sống đẹp nhất khi bạn sống đúng với con người mình.",
+      "Hôm nay tôi tin rằng bạn sẽ làm được điều gì đó tuyệt vời!",
+      "Cứ mỗi lần vấp ngã, bạn đang học cách đứng dậy mạnh hơn.",
+      "Bạn có trái tim ấm áp đủ để sưởi ấm cả thế giới.",
+      "Đừng so sánh hành trình của mình với người khác — mỗi người có con đường riêng.",
+      "Ngày mai sẽ tươi sáng hơn hôm nay, hãy tin vào điều đó!",
+      "May mắn đang mỉm cười với bạn ngay lúc này.",
+      "Bạn xứng đáng với tất cả những điều tốt đẹp nhất!",
+      "Một phụ nữ biết giá trị của mình không cần ai xác nhận.",
+      "Hãy là đóa hoa nở rộ giữa cuộc đời — dù mưa hay nắng.",
+      "Mỗi thử thách đều mang theo một bài học quý giá.",
+      "Trái tim bình yên chính là giàu có nhất trên đời.",
+      "Bạn đang làm tốt hơn bạn nghĩ đấy!",
+      "Hôm nay hãy làm một điều khiến tương lai bạn cảm ơn hiện tại.",
+      "Tình yêu chân thật luôn tìm đến những người biết yêu thương bản thân.",
+      "Năng lượng tích cực của bạn lan tỏa đến mọi người xung quanh.",
+      "Bạn không cần ai cho phép mình tỏa sáng.",
+      "Sức mạnh lớn nhất của người phụ nữ là sự đồng cảm và kiên nhẫn.",
+      "Hôm nay là một trang mới — hãy viết điều gì đó đẹp lên đó!",
+      "Niềm vui nhỏ bé hôm nay là viên gạch xây hạnh phúc ngày mai.",
+      "Bạn được sinh ra để làm những điều phi thường.",
+      "Hãy uống đủ nước, ngủ đủ giấc — sức khỏe là tài sản quý nhất!",
+      "Một ngày bạn sẽ nhìn lại và tự hào về những gì mình đã vượt qua.",
+      "Vũ trụ đang sắp xếp mọi thứ tốt đẹp cho bạn, hãy tin tưởng.",
+      "Bạn có khả năng truyền cảm hứng cho người khác mà không hay biết.",
+      "Mỗi sáng thức dậy là một món quà — hãy dùng nó thật ý nghĩa.",
+      "Đừng bao giờ quên rằng bạn quan trọng với rất nhiều người.",
+      "Thành công không ồn ào — nó đến nhẹ nhàng với những người kiên trì.",
+      "Hôm nay mọi việc sẽ suôn sẻ hơn bạn mong đợi!",
+      "Bạn là ánh sáng trong cuộc đời của những người yêu thương bạn.",
+      "Hãy mỉm cười — nụ cười của bạn làm đẹp cả một ngày của người khác.",
+      "Bạn đang trên con đường đúng đắn, dù đôi khi nó có vẻ quanh co.",
+      "Phụ nữ mạnh mẽ không phải là không bao giờ khóc — mà là khóc xong rồi đứng dậy.",
+      "Hôm nay hãy tự thưởng cho mình điều gì đó — bạn xứng đáng!",
+      "Mọi giấc mơ đều bắt đầu bằng một bước chân nhỏ.",
+      "Bạn không đơn độc — có rất nhiều người đang cổ vũ bạn từ xa.",
+      "Hãy làm điều khiến trái tim bạn hát lên!",
+      "Cuộc sống quá ngắn để mặc đồ nhàm chán và uống cà phê tệ!",
+      "Bạn vừa nhận được nguồn năng lượng tích cực từ vũ trụ! ✨",
+      "Hôm nay vận may đang theo dõi bạn — đừng để nó thất vọng nhé!",
+      "Bạn có một điều kỳ diệu mà không ai khác có — chính là bản thân bạn.",
+      "Mỗi ngày với bạn là một ngày may mắn với những người được ở bên.",
+      "Hãy tin vào linh cảm của mình — con tim phụ nữ thường đúng lắm đó!",
+      "Bạn đang glow up từng ngày — hãy tiếp tục nhé!",
+      "May mắn + Cố gắng = Thành công mà bạn xứng đáng có.",
+      "Hôm nay sẽ có tin vui — hãy để ý nhé!",
+      "Bạn mang lại niềm vui cho mọi người xung quanh mà không hay biết.",
+      "Đừng để ai dập tắt ngọn lửa trong bạn — kể cả chính mình!",
+      "Mọi điều tốt đẹp đang tìm đường đến với bạn.",
+      "Hãy nhảy múa giữa cơn mưa — đừng chờ trời tạnh mới sống!",
+      "Bạn là tác phẩm nghệ thuật đang được hoàn thiện mỗi ngày.",
+      "Tình bạn chân thành là tài sản không tiền nào mua được.",
+      "Hôm nay bạn sẽ gặp điều gì đó khiến bạn phải mỉm cười!",
+      "Một phụ nữ bình yên là người hạnh phúc nhất thế gian.",
+      "Bạn có khả năng vượt qua bất kỳ thử thách nào — lịch sử đã chứng minh!",
+      "Hãy chăm sóc bản thân như cách bạn chăm sóc những người bạn yêu.",
+      "Năm nay sẽ là năm tốt nhất trong cuộc đời bạn — hãy đón nhận!",
+      "Bạn không cần ai hoàn chỉnh mình — bạn đã hoàn chỉnh rồi.",
+      "Điều tuyệt vời nhất sắp xảy ra — hãy sẵn sàng!",
+      "Hôm nay hãy gọi cho người bạn lâu chưa liên lạc — họ đang nhớ bạn đấy.",
+      "Mỗi thất bại chỉ là bản nháp trước khi viết nên thành công.",
+      "Bạn xứng đáng được yêu thương đúng cách, đủ nhiều và không điều kiện.",
+      "Hãy sống chậm lại một chút — vội vã quá sẽ bỏ lỡ những điều đẹp.",
+      "Tiền bạc đến rồi đi, nhưng kỷ niệm đẹp ở lại mãi mãi.",
+      "Bạn đang tạo nên một câu chuyện cuộc đời thật đáng đọc!",
+      "Hôm nay hãy làm điều gì đó lần đầu tiên — mọi kỹ năng đều bắt đầu như vậy.",
+      "Sắc đẹp thật sự tỏa ra từ bên trong — và bạn đang tỏa sáng rực rỡ!",
+      "Hãy ăn ngon, ngủ đủ giấc và sống thật — đó là bí quyết hạnh phúc.",
+      "Bạn là nguồn cảm hứng cho ai đó ngay lúc này mà chưa biết.",
+      "Những điều tốt nhất luôn đến vào lúc bạn không ngờ nhất.",
+      "Hôm nay vũ trụ đang ủng hộ bạn — hãy mạnh dạn tiến về phía trước!",
+      "Bạn có đủ can đảm, đủ trí tuệ và đủ yêu thương để thay đổi thế giới.",
+      "Mỗi ngày bạn thức dậy là một lần vũ trụ nói: 'Tôi cần bạn ở đây!'",
+      "Hãy để người khác thấy điều tốt đẹp — thế giới cần nhiều bông hoa như bạn hơn.",
+      "Bạn không cần phải có tất cả câu trả lời — cứ đi rồi sẽ hiểu.",
+      "May mắn của bạn hôm nay: sức khỏe dẻo dai, tinh thần tươi vui!",
+      "Ai đó đang thầm ngưỡng mộ bạn mà không dám nói!",
+      "Hôm nay hãy cho phép mình được vui — không cần lý do gì cả.",
+      "Mọi điều bạn cần đã có sẵn trong bạn rồi.",
+      "Bạn sẽ nhìn lại ngày hôm nay và mỉm cười — tin đi!",
+      "Hãy tận hưởng hành trình, đích đến sẽ tự nhiên đến đúng lúc.",
+      "Bạn đang làm người xung quanh tự hào hơn họ thể hiện đấy!",
+      "Một tách cà phê ngon, một ngày mới tươi sáng — bắt đầu thôi nào!",
+      "Thế giới trở nên đẹp hơn khi bạn có mặt trong đó.",
+      "Hãy cứ là chính mình — phiên bản thật của bạn là phiên bản tốt nhất.",
+      "Bạn không chỉ đang sống — bạn đang tỏa sáng!",
+      "Hôm nay, ngày 20/10, vũ trụ gửi đến bạn muôn vàn yêu thương! 🌸",
+      "Bạn là điều kỳ diệu nhất mà những người yêu bạn từng được trao tặng. 💖",
+    ];
+
+    let shuffled = [...MESSAGES].sort(() => Math.random() - 0.5);
+    let msgIdx = 0;
+
+    function nextMsg() {
+      const m = shuffled[msgIdx];
+      msgIdx = (msgIdx + 1) % shuffled.length;
+      if (msgIdx === 0) shuffled = [...MESSAGES].sort(() => Math.random() - 0.5);
+      return m;
+    }
+
+    const overlay  = document.getElementById('msgOverlay');
+    const msgText  = document.getElementById('msgText');
+    const hint     = document.getElementById('swipeHint');
+
+    function showMsg() {
+      msgText.textContent = nextMsg();
+      overlay.classList.remove('hidden', 'closing');
+      hint.style.transition = 'opacity 0.3s';
+      hint.style.opacity = '0';
+    }
+
+    function hideMsg() {
+      if (overlay.classList.contains('hidden')) return;
+      overlay.classList.add('closing');
+      setTimeout(() => overlay.classList.add('hidden'), 280);
+      hint.style.opacity = '1';
+    }
+
+    overlay.addEventListener('click', hideMsg);
+    hint.addEventListener('click', showMsg);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') hideMsg(); });
+
+    let tsY = 0, tsX = 0;
+    document.addEventListener('touchstart', e => {
+      tsY = e.touches[0].clientY;
+      tsX = e.touches[0].clientX;
+    }, { passive: true });
+
+    document.addEventListener('touchend', e => {
+      const dy = e.changedTouches[0].clientY - tsY;
+      const dx = e.changedTouches[0].clientX - tsX;
+      if (dy < -55 && Math.abs(dy) > Math.abs(dx) * 1.2) {
+        overlay.classList.contains('hidden') ? showMsg() : hideMsg();
+      }
+    }, { passive: true });
 
     loop();
   </script>
