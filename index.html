@@ -79,7 +79,8 @@
         0 0 50px  rgba(180, 40, 80, 0.08),
         inset 0 1px 0 rgba(212, 175, 55, 0.14),
         inset 0 0 60px rgba(180, 40, 80, 0.04);
-      max-width: min(90vw, 660px);
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
     }
 
     /* ── Trang trí ── */
@@ -197,102 +198,84 @@
       to   { opacity: 1; transform: translateY(0);    }
     }
 
-    /* ── Hint vuốt lên ── */
-    .swipe-hint {
-      position: fixed;
-      bottom: 32px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 15;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
+    /* ── Flip card scene ── */
+    .card-scene {
+      perspective: 1400px;
+      max-width: min(90vw, 660px);
+      width: 100%;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.75s cubic-bezier(0.4, 0.2, 0.2, 1);
       cursor: pointer;
+    }
+
+    .card-inner.flipped { transform: rotateY(180deg); }
+
+    .card-back {
+      position: absolute;
+      inset: 0;
+      transform: rotateY(180deg);
+      justify-content: center;
+    }
+
+    /* ── Flip hint (front face) ── */
+    .flip-hint {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 20px;
       opacity: 0;
       animation: fadeSlideUp 1s ease 3.2s forwards;
-      user-select: none;
-      -webkit-user-select: none;
     }
-    .swipe-hint-arrow {
-      font-size: 1.3rem;
-      color: rgba(212, 175, 55, 0.85);
-      animation: arrowBounce 1.7s ease-in-out infinite;
+    .flip-icon {
+      font-size: 1rem;
+      color: rgba(212, 175, 55, 0.80);
+      display: inline-block;
+      animation: flipIconSpin 2.8s ease-in-out 3.2s infinite;
     }
-    .swipe-hint-text {
+    @keyframes flipIconSpin {
+      0%, 60%, 100% { transform: rotateY(0deg);   opacity: 0.75; }
+      30%            { transform: rotateY(180deg); opacity: 1;    }
+    }
+    .flip-text {
       font-family: 'Be Vietnam Pro', sans-serif;
-      font-size: 0.76rem;
+      font-size: 0.73rem;
       font-weight: 300;
-      letter-spacing: 1.4px;
-      color: rgba(248, 215, 225, 0.60);
-      white-space: nowrap;
-    }
-    @keyframes arrowBounce {
-      0%, 100% { transform: translateY(0);   opacity: 0.6; }
-      50%       { transform: translateY(-7px); opacity: 1;   }
+      letter-spacing: 1.3px;
+      color: rgba(248, 215, 225, 0.52);
     }
 
-    /* ── Modal lời chúc ── */
-    .msg-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(12, 2, 8, 0.72);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      cursor: pointer;
-      animation: overlayIn 0.35s ease forwards;
-    }
-    .msg-overlay.hidden { display: none; }
-    .msg-overlay.closing { animation: overlayOut 0.28s ease forwards; }
-    @keyframes overlayIn  { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
-
-    .msg-card {
-      background: rgba(48, 5, 20, 0.95);
-      border: 1px solid rgba(212, 175, 55, 0.5);
-      border-radius: 20px;
-      padding: clamp(30px, 5vw, 52px) clamp(28px, 7vw, 66px);
-      max-width: min(86vw, 520px);
-      text-align: center;
-      animation: cardUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-      box-shadow:
-        0 0 90px rgba(0, 0, 0, 0.7),
-        0 0 40px rgba(180, 40, 80, 0.14),
-        inset 0 1px 0 rgba(212, 175, 55, 0.18);
-    }
-    @keyframes cardUp {
-      from { transform: translateY(52px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-    .msg-label {
+    /* ── Back face content ── */
+    .back-label {
       font-family: 'Be Vietnam Pro', sans-serif;
       font-size: 0.68rem;
       font-weight: 600;
       letter-spacing: 3.5px;
       color: rgba(212, 175, 55, 0.72);
       text-transform: uppercase;
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
-    .msg-text {
+    .back-msg {
       font-family: 'Playfair Display', serif;
-      font-size: clamp(1.05rem, 3.4vw, 1.52rem);
+      font-size: clamp(1.04rem, 3.2vw, 1.48rem);
       font-style: italic;
       color: #FFF5EE;
       line-height: 1.76;
-      text-shadow: 0 0 24px rgba(212, 175, 55, 0.22);
+      text-shadow: 0 0 24px rgba(212, 175, 55, 0.24);
+      text-align: center;
     }
-    .msg-divider {
+    .back-divider {
       width: 56px;
       height: 1px;
       background: linear-gradient(90deg,
         transparent, rgba(212,175,55,0.65), transparent);
-      margin: 18px auto 12px;
+      margin: 20px auto 12px;
     }
-    .msg-close {
+    .back-close {
       font-family: 'Be Vietnam Pro', sans-serif;
       font-size: 0.70rem;
       font-weight: 300;
@@ -308,32 +291,33 @@
   <canvas id="c"></canvas>
 
   <div class="content">
-    <div class="card">
-      <div class="ornament">✦ ✦ ✦</div>
-      <h1 class="title">Chúc Mừng Ngày<br>Phụ Nữ Việt Nam</h1>
-      <div class="divider"></div>
-      <div class="date" aria-label="20 tháng 10">20/10</div>
-      <p class="subtitle">
-        Chúc các chị em luôn rạng rỡ,<br>
-        hạnh phúc và thành công
-      </p>
-      <div class="ornament-bottom">🌸 ✦ 🌸</div>
-    </div>
-  </div>
+    <div class="card-scene">
+      <div class="card-inner" id="cardInner">
 
-  <!-- Swipe hint -->
-  <div class="swipe-hint" id="swipeHint">
-    <div class="swipe-hint-arrow">↑</div>
-    <div class="swipe-hint-text">Vuốt lên nhận lời chúc</div>
-  </div>
+        <div class="card card-front">
+          <div class="ornament">✦ ✦ ✦</div>
+          <h1 class="title">Chúc Mừng Ngày<br>Phụ Nữ Việt Nam</h1>
+          <div class="divider"></div>
+          <div class="date" aria-label="20 tháng 10">20/10</div>
+          <p class="subtitle">
+            Chúc các chị em luôn rạng rỡ,<br>
+            hạnh phúc và thành công
+          </p>
+          <div class="ornament-bottom">🌸 ✦ 🌸</div>
+          <div class="flip-hint">
+            <span class="flip-icon">↺</span>
+            <span class="flip-text">Chạm để nhận lời chúc</span>
+          </div>
+        </div>
 
-  <!-- Lucky message modal -->
-  <div class="msg-overlay hidden" id="msgOverlay">
-    <div class="msg-card">
-      <div class="msg-label">✦ Lời Chúc May Mắn ✦</div>
-      <p class="msg-text" id="msgText"></p>
-      <div class="msg-divider"></div>
-      <div class="msg-close">Chạm để đóng</div>
+        <div class="card card-back">
+          <div class="back-label">✦ Lời Chúc May Mắn ✦</div>
+          <p class="back-msg" id="backMsg"></p>
+          <div class="back-divider"></div>
+          <div class="back-close">↺ Chạm để lật lại</div>
+        </div>
+
+      </div>
     </div>
   </div>
 
@@ -754,41 +738,15 @@
       return m;
     }
 
-    const overlay  = document.getElementById('msgOverlay');
-    const msgText  = document.getElementById('msgText');
-    const hint     = document.getElementById('swipeHint');
+    const cardInner = document.getElementById('cardInner');
+    const backMsg   = document.getElementById('backMsg');
 
-    function showMsg() {
-      msgText.textContent = nextMsg();
-      overlay.classList.remove('hidden', 'closing');
-      hint.style.transition = 'opacity 0.3s';
-      hint.style.opacity = '0';
-    }
-
-    function hideMsg() {
-      if (overlay.classList.contains('hidden')) return;
-      overlay.classList.add('closing');
-      setTimeout(() => overlay.classList.add('hidden'), 280);
-      hint.style.opacity = '1';
-    }
-
-    overlay.addEventListener('click', hideMsg);
-    hint.addEventListener('click', showMsg);
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') hideMsg(); });
-
-    let tsY = 0, tsX = 0;
-    document.addEventListener('touchstart', e => {
-      tsY = e.touches[0].clientY;
-      tsX = e.touches[0].clientX;
-    }, { passive: true });
-
-    document.addEventListener('touchend', e => {
-      const dy = e.changedTouches[0].clientY - tsY;
-      const dx = e.changedTouches[0].clientX - tsX;
-      if (dy < -55 && Math.abs(dy) > Math.abs(dx) * 1.2) {
-        overlay.classList.contains('hidden') ? showMsg() : hideMsg();
+    cardInner.addEventListener('click', () => {
+      if (!cardInner.classList.contains('flipped')) {
+        backMsg.textContent = nextMsg();
       }
-    }, { passive: true });
+      cardInner.classList.toggle('flipped');
+    });
 
     loop();
   </script>
